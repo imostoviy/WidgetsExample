@@ -10,33 +10,42 @@ import SwiftUI
 struct EmojiPickerView: View {
 
     let emojiData = EmojiProvider.all()
-    @State private var emojiDetailsViewIsShown = false
+    @State private var visibleEmojiDetails: EmojiItem?
 
     var body: some View {
         NavigationView {
 
             List {
 
-                ForEach(emojiData) { emojiItem in
-
+                ForEach(emojiData) { emojiDetails in
                     Button(action: {
-                        emojiDetailsViewIsShown.toggle()
+                        visibleEmojiDetails = emojiDetails
                     }, label: {
-                        rowView(for: emojiItem)
+                        EmojiItemView(emoji: emojiDetails.emoji, emojiName: emojiDetails.name)
                     })
-                    .sheet(isPresented: $emojiDetailsViewIsShown) {
-                        EmojiDetailsView(emojiDetails: emojiItem)
-                    }
                 }
             }
             .foregroundColor(.black)
-            .listStyle(.insetGrouped)
-            .navigationBarTitle("Emoji Picker")
+            .listStyle(InsetGroupedListStyle())
+            .navigationBarTitle("Emoji pedia")
         }
+        .onOpenURL { url in
+            guard let emojiDetails = emojiData.first(where: { $0.url == url }) else { return }
+            visibleEmojiDetails = emojiDetails
+        }
+        .sheet(item: $visibleEmojiDetails, content: { emojiDetails in
+            EmojiDetailsView(emojiDetails: emojiDetails)
+        })
     }
+}
 
-    private func rowView(for item: EmojiItem) -> some View {
-        Text("\(item.emoji) \(item.name)")
+struct EmojiItemView: View {
+
+    let emoji: String
+    let emojiName: String
+
+    var body: some View {
+        Text("\(emoji) \(emojiName)")
             .font(.largeTitle)
             .padding([.top, .bottom])
     }
@@ -52,7 +61,6 @@ struct EmojiDetailsView: View {
             Color.indigo.edgesIgnoringSafeArea(.all)
 
             VStack {
-
                 VStack(alignment: .leading) {
 
                     Text("\(emojiDetails.emoji) \(emojiDetails.name)")
