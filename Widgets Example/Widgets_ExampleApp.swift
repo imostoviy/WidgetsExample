@@ -11,7 +11,7 @@ import SwiftUI
 struct Widgets_ExampleApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            EmojiPickerView()
         }
     }
 }
